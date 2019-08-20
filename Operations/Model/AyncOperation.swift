@@ -13,12 +13,15 @@ class AsyncOperation: Operation {
         return true
     }
     
-    var _isExecuting: Bool = false
+    private let _queue = DispatchQueue(label: "asyncOperationQueue", attributes: .concurrent)
+    private var _isExecuting: Bool = false
     
     override var isExecuting: Bool {
         set {
             willChangeValue(forKey: "isExecuting")
-            _isExecuting = newValue
+            _queue.async(flags: .barrier) {
+                self._isExecuting = newValue
+            }
             didChangeValue(forKey: "isExecuting")
         }
         
@@ -32,7 +35,9 @@ class AsyncOperation: Operation {
     override var isFinished: Bool {
         set {
             willChangeValue(forKey: "isFinished")
-            _isFinished = newValue
+            _queue.async(flags: .barrier) {
+                self._isFinished = newValue
+            }
             didChangeValue(forKey: "isFinished")
         }
         
